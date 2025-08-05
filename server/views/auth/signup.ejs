@@ -1,0 +1,62 @@
+<%- include('../partials/head') %>
+  </head>
+  <body>
+    <%- include('../partials/nav') %>
+    <main className="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Sign-up With Details</h1>
+      <form action="/Signup" method="POST" className="max-w-md mx-auto">
+
+        <%- include('../partials/err') %>
+        <input
+          type="text"
+          name="FirstName"
+          value="<% oldInput.FirstName ? oldInput.FirstName : '' %>"
+          placeholder="Enter FirstName"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+          required/>
+        <input
+          type="text"
+          name="LastName"
+          value="<% oldInput.LastName ? oldInput.LastName : '' %>"
+          placeholder="Enter LastName"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        <input
+          type="email"
+          name="email"
+          value="<% oldInput.email ? oldInput.email : '' %>"
+          placeholder="Enter email"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+          required/>
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter password"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+          required/>
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Enter confirm password"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+          required/>
+
+        <div className="mb-3">
+          <p></p>
+          <label>
+            <input type="radio" value="guest" name="userType" id="guest" className="m-2" checked=<% oldInput.userType === "guest" %>/><span> Guest </span>
+          </label>
+          <label>
+            <input type="radio" value="host" name="userType" id="host" className="m-2"  checked=<% oldInput.userType === "host" %> /><span> Host </span>
+          </label>
+        </div>
+
+        <div className="mb-3 m-3">
+          <input type="checkbox" id="terms" name="terms" value="terms">
+          <label>i agree to the terms and condition</label>
+        </div>
+        <input type="submit" value="Sign In" className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition duration-300" />
+      </form>
+    </main>
+  </body>
+</html>

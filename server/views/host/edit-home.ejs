@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+  </head>
+  <body>
+    <%- include('../partials/nav') %>
+    <main className="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800"><%= editing ?"Edit":"Register"%> Your Home on AirBnB</h1>
+      <form action="/host/<%= editing ? 'edit-home' : 'add-home' %>" method="POST" className="max-w-md mx-auto" enctype="multipart/form-data">
+        <input type="hidden"
+          name="id"
+          value="<%= editing ? home._id : '' %>"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+
+        <input
+          type="text"
+          name="houseName"
+          value="<%= editing ? home.houseName : '' %>"
+          placeholder="Enter your House Name"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"/>
+        <input
+          type="text"
+          name="price"
+          value="<%= editing ? home.price : '' %>"
+          placeholder="Price Per Night"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"/>
+        <input
+          type="text"
+          name="location"
+          value="<%= editing ? home.location : '' %>"
+          placeholder="Location"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"/>
+        <input
+          type="text"
+          name="rating"
+          value="<%= editing ? home.rating : '' %>"
+          placeholder="Rating"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"/>
+        <input
+          type="file"
+          name="photo"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"/>
+        <textarea
+          name="description"
+          placeholder="Enter description"
+          className="w-full px-4 py-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" ></textarea>
+        
+        <input type="submit" value="<%= editing ? 'Update' : 'Submit'%>" className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition duration-300" />
+      </form>
+    </main>
+  </body>
+</html>
