@@ -3,15 +3,15 @@ const Home = require("../models/home");
 const fs = require("fs");
 
 exports.getAddHome = (req, res, next) => {
-  res.render("host/edit-Home", {
-    pageTitle: "Add Home to airbnb",
-    currentPage: "addHome",
-    editing: false,
-    home: Home,
-    isLoggedIn: req.isLoggedIn,
-    user: req.session.user,
-  });
-  // res.json({ home: Home });
+  // res.render("host/edit-Home", {
+  //   pageTitle: "Add Home to airbnb",
+  //   currentPage: "addHome",
+  //   editing: false,
+  //   home: Home,
+  //   isLoggedIn: req.isLoggedIn,
+  //   user: req.session.user,
+  // });
+  return res.json({ home: Home });
 };
 
 exports.getEditHome = (req, res, next) => {
@@ -27,20 +27,22 @@ exports.getEditHome = (req, res, next) => {
     .then((home) => {
       if (!home) {
         console.log("not found for editing");
+        return (
           res
-            .redirect("/host/host-home-list");
-            // .json({ success: false, message: "Home not found" })
+            // .redirect("/host/host-home-list");
+            .json({ success: false, message: "Home not found" })
+        );
       }
       console.log(editing, homeId, home);
-      res.render("host/edit-Home", {
-        home: home,
-        pageTitle: "Edit Home to airbnb",
-        currentPage: "host-homes",
-        editing: editing,
-        isLoggedIn: req.isLoggedIn,
-        user: req.session.user,
-      });
-      // return res.json({ home: home });
+      // res.render("host/edit-Home", {
+      //   home: home,
+      //   pageTitle: "Edit Home to airbnb",
+      //   currentPage: "host-homes",
+      //   editing: editing,
+      //   isLoggedIn: req.isLoggedIn,
+      //   user: req.session.user,
+      // });
+      return res.json({ home: home });
     })
     .catch((err) => {
       console.log("error while finding home for editing", err);
@@ -52,15 +54,16 @@ exports.getEditHome = (req, res, next) => {
 
 exports.getHostHomes = (req, res, next) => {
   Home.find().then(
-    (registeredHomes) =>
-      res.render("host/host-home-list", {
-        registeredHomes: registeredHomes,
-        pageTitle: "Host Homes List",
-        currentPage: "host-homes",
-        isLoggedIn: req.isLoggedIn,
-        user: req.session.user,
-      })
-    // res.json({ registeredHomes: registeredHomes })
+    (registeredHomes) => {
+      return res.json({ registeredHomes: registeredHomes });
+    }
+    // res.render("host/host-home-list", {
+    //   registeredHomes: registeredHomes,
+    //   pageTitle: "Host Homes List",
+    //   currentPage: "host-homes",
+    //   isLoggedIn: req.isLoggedIn,
+    //   user: req.session.user,
+    // })
   );
 };
 
@@ -84,10 +87,7 @@ exports.postAddHome = (req, res, next) => {
   });
   home.save().then(() => {
     console.log("record inserted succesfully");
-      res
-        .redirect("host-home-list")
-        // .status(201)
-        // .json({ success: true, message: "Home added successfully" })
+    res.status(201).json({ success: true, message: "Home added successfully" });
   });
 };
 
@@ -128,13 +128,13 @@ exports.postEditHome = (req, res, next) => {
             .status(500)
             .json({ success: false, message: "Error updating home" });
         });
-      res.redirect("/host/host-home-list");
+      // res.redirect("/host/host-home-list");
     })
     .catch((err) => {
       console.log("error while finding home", err);
-      // return res
-      //   .status(500)
-      //   .json({ success: false, message: "Error finding home" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Error finding home" });
     });
 };
 
@@ -143,15 +143,16 @@ exports.postDeleteHome = (req, res, next) => {
   console.log("delete", homeId);
   Home.findByIdAndDelete(homeId)
     .then((err) => {
-      res.redirect("/host/host-home-list");
-      // return res
-      //   .status(200)
-      //   .json({ success: true, message: "Home deleted successfully" });
+      // res
+      // .redirect("/host/host-home-list");
+      return res
+        .status(200)
+        .json({ success: true, message: "Home deleted successfully" });
     })
     .catch((err) => {
       console.log("error while deleting", err);
-      // return res
-      //   .status(500)
-      //   .json({ success: false, message: "Error deleting home" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Error deleting home" });
     });
 };
