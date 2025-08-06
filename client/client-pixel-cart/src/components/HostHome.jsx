@@ -10,8 +10,9 @@ const HostHome = () => {
     const fetchHomes = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3001/host/host-home-list",{
-            withCredentials: true
+          "http://localhost:3001/host/host-home-list",
+          {
+            withCredentials: true,
           }
         );
         setHomes(res.data.registeredHomes || []);
@@ -25,6 +26,18 @@ const HostHome = () => {
 
     fetchHomes();
   }, []);
+
+  const HandleDelete = async (homeId) => {
+    try {
+      await axios.delete(`http://localhost:3001/host/delete-home/${homeId}`, {
+        withCredentials: true,
+      });
+      setHomes((prevHomes) => prevHomes.filter((home) => home._id !== homeId));
+      alert("Home deleted successfully");
+    } catch (error) {
+      console.error("Error deleting home:", error);
+    }
+  };
 
   if (loading) return <Loading />;
 
@@ -80,18 +93,20 @@ const HostHome = () => {
                 >
                   Edit
                 </a>
-                <form
+                {/* <form
                   action={`/host/delete-home/${home._id}`}
                   method="post"
                   className="inline"
+                > */}
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  onClick={() => {
+                    HandleDelete(home._id);
+                  }}
                 >
-                  <button
-                    type="submit"
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </form>
+                  Delete
+                </button>
+                {/* </form> */}
               </div>
             </div>
           ))
