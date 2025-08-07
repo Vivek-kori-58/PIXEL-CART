@@ -1,16 +1,9 @@
 const home = require("../models/home");
 const Home = require("../models/home");
+const mongoose = require("mongoose");
 const fs = require("fs");
 
 exports.getAddHome = (req, res, next) => {
-  // res.render("host/edit-Home", {
-  //   pageTitle: "Add Home to airbnb",
-  //   currentPage: "addHome",
-  //   editing: false,
-  //   home: Home,
-  //   isLoggedIn: req.isLoggedIn,
-  //   user: req.session.user,
-  // });
   return res.json({ home: Home });
 };
 
@@ -91,51 +84,124 @@ exports.postAddHome = (req, res, next) => {
   });
 };
 
-exports.postEditHome = (req, res, next) => {
-  const { id, houseName, price, location, rating, description } = req.body;
-  if (!home) {
-    return res.status(404).json({ success: false, message: "Home not found" });
-  }
-  Home.findById(id)
-    .then((home) => {
-      home.houseName = houseName;
-      home.price = price;
-      home.location = location;
-      home.rating = rating;
-      home.description = description;
+// exports.postEditHome = (req, res, next) => {
+//   const { id, houseName, price, location, rating, description } = req.body;
+//   if (!home) {
+//     return res.status(404).json({ success: false, message: "Home not found" });
+//   }
+//   Home.findById(id)
+//     .then((home) => {
+//       home.houseName = houseName;
+//       home.price = price;
+//       home.location = location;
+//       home.rating = rating;
+//       home.description = description;
 
-      if (req.file) {
-        fs.unlink(home.photo, (err) => {
-          if (err) {
-            console.log("error while deleting old photo", err);
-          }
-        });
-        home.photo = req.file.path; // Update photo if a new file is uploaded
-      }
+//       if (req.file) {
+//         fs.unlink(home.photo, (err) => {
+//           if (err) {
+//             console.log("error while deleting old photo", err);
+//           }
+//         });
+//         home.photo = req.file.path; // Update photo if a new file is uploaded
+//       }
 
-      home
-        .save()
-        .then((result) => {
-          console.log("updated", result);
-          return res.json({
-            success: true,
-            message: "home updated successfully",
-          });
-        })
-        .catch((err) => {
-          console.log("error while editing home", err);
-          return res
-            .status(500)
-            .json({ success: false, message: "Error updating home" });
-        });
-      // res.redirect("/host/host-home-list");
-    })
-    .catch((err) => {
-      console.log("error while finding home", err);
+//       home
+//         .save()
+//         .then((result) => {
+//           console.log("updated", result);
+//           return res.json({
+//             success: true,
+//             message: "home updated successfully",
+//           });
+//         })
+//         .catch((err) => {
+//           console.log("error while editing home", err);
+//           return res
+//             .status(500)
+//             .json({ success: false, message: "Error updating home" });
+//         });
+//       // res.redirect("/host/host-home-list");
+//     })
+//     .catch((err) => {
+//       console.log("error while finding home", err);
+//       return res
+//         .status(500)
+//         .json({ success: false, message: "Error finding home" });
+//     });
+// };
+// exports.postEditHome = async (req, res) => {
+//   const homeId = req.body.id;
+
+//   try {
+//     const home = await Home.findById(homeId);
+//     if (!home) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Home not found" });
+//     }
+
+//     home.houseName = req.body.houseName;
+//     home.price = req.body.price;
+//     home.location = req.body.location;
+//     home.rating = req.body.rating;
+//     home.description = req.body.description;
+
+//     if (req.file) {
+//       home.photo = req.file.path;
+//     }
+
+//     await home.save();
+
+//     res
+//       .status(200)
+//       .json({ success: true, message: "Home updated successfully" });
+//   } catch (err) {
+//     console.error("Error updating home:", err);
+//     res.status(500).json({ success: false, message: "Error updating home" });
+//   }
+// };
+
+exports.postEditHome = async (req, res) => {
+  try {
+    const homeId = req.body.id;
+    const updatedData = {
+      houseName: req.body.houseName,
+      price: req.body.price,
+      location: req.body.location,
+      description: req.body.description,
+      rating: req.body.rating,
+    };
+
+    if (req.file) {
+      updatedData.photo = req.file.path.replace(/\\/g, "/"); // normalize path
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(homeId)) {
       return res
-        .status(500)
-        .json({ success: false, message: "Error finding home" });
+        .status(400)
+        .json({ success: false, message: "Invalid home ID" });
+    }
+
+    const result = await Home.findByIdAndUpdate(homeId, updatedData, {
+      new: true,
     });
+
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Home not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Home updated successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ success: false, message: "Something went wrong" });
+  }
 };
 
 exports.postDeleteHome = (req, res, next) => {

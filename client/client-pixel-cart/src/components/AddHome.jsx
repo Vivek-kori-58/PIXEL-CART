@@ -1,51 +1,83 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 
 const AddHome = () => {
+  const [searchParams] = useSearchParams();
+  const isEditing = searchParams.get("editing") === "true";
+  const homeId = searchParams.get("id");
+
   const [formData, setFormData] = useState({
     houseName: "",
     price: "",
     location: "",
     rating: "",
     description: "",
-    photo: null, // file object
+    photo: null,
   });
+
+  useEffect(() => {
+    if (isEditing && homeId) {
+      axios
+        .get(`http://localhost:3001/host/edit-home/${homeId}?editing=true`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          const home = res.data.home;
+          setFormData({
+            houseName: home.houseName,
+            price: home.price,
+            location: home.location,
+            rating: home.rating,
+            description: home.description,
+            photo: null, // User can optionally re-upload photo
+          });
+        })
+        .catch((err) => console.error("Error fetching home:", err));
+    }
+  }, [isEditing, homeId]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "photo") {
-      setFormData({ ...formData, photo: files[0] });
+      setFormData((prev) => ({ ...prev, photo: files[0] }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    console.log("Editing home ID:", homeId); // must print valid MongoDB ObjectId
 
-    const data = new FormData();
-    data.append("houseName", formData.houseName);
-    data.append("price", formData.price);
-    data.append("location", formData.location);
-    data.append("rating", formData.rating);
-    data.append("description", formData.description);
-    data.append("photo", formData.photo); // file
+    e.preventDefault();
+    const formDataToSend = new FormData();
+    formDataToSend.append("id", homeId); // append home ID for editing
+    formDataToSend.append("houseName", formData.houseName);
+    formDataToSend.append("price", formData.price);
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("rating", formData.rating);
+    formDataToSend.append("description", formData.description);
+
+    // Only send file if a new one is uploaded
+    if (formData.photo) {
+      formDataToSend.append("photo", formData.photo);
+    }
 
     try {
       const res = await axios.post(
-        "http://localhost:3001/host/add-home",
-        data,
+        `http://localhost:3001/host/edit-home`, // double check route
+        formDataToSend,
         {
-          withCredentials: true, // if session/auth is required
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          withCredentials: true,
         }
       );
 
       if (res.data.success) {
-        alert("Home added successfully!");
-        // Optionally reset form or redirect
+        alert("Home updated successfully!");
         setFormData({
           houseName: "",
           price: "",
@@ -54,77 +86,73 @@ const AddHome = () => {
           description: "",
           photo: null,
         });
+      } else {
+        alert("Something went wrong while updating.");
       }
     } catch (err) {
-      console.error("Error submitting form:", err);
-      alert("Something went wrong!");
+      console.error("Update Error:", err);
+      alert("Something went wrong");
     }
   };
 
   return (
-    <main className="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        Register Your Home on AirBnB
-      </h1>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-        <input
-          type="text"
-          name="houseName"
-          placeholder="Enter your House Name"
-          value={formData.houseName}
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-          required
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price Per Night"
-          value={formData.price}
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-          required
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-          required
-        />
-        <input
-          type="number"
-          step="0.1"
-          name="rating"
-          placeholder="Rating"
-          value={formData.rating}
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-        />
-        <input
-          type="file"
-          name="photo"
-          accept="image/*"
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Enter description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full px-4 py-2 mb-4 border rounded-md"
-        ></textarea>
-        <input
-          type="submit"
-          value="Submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
-        />
-      </form>
-    </main>
+    <form
+      onSubmit={handleSubmit}
+      encType="multipart/form-data"
+      className="max-w-xl mx-auto p-6 bg-white shadow-md rounded space-y-4"
+    >
+      <input
+        type="text"
+        name="houseName"
+        className="w-full border border-gray-300 rounded p-2"
+        value={formData.houseName || ""}
+        onChange={handleChange}
+        placeholder="House Name"
+      />
+      <input
+        type="number"
+        name="price"
+        className="w-full border border-gray-300 rounded p-2"
+        value={formData.price || ""}
+        onChange={handleChange}
+        placeholder="Price"
+      />
+      <input
+        type="text"
+        name="location"
+        className="w-full border border-gray-300 rounded p-2"
+        value={formData.location || ""}
+        onChange={handleChange}
+        placeholder="Location"
+      />
+      <input
+        type="number"
+        name="rating"
+        className="w-full border border-gray-300 rounded p-2"
+        value={formData.rating || ""}
+        onChange={handleChange}
+        placeholder="Rating"
+      />
+      <textarea
+        name="description"
+        className="w-full border border-gray-300 rounded p-2"
+        value={formData.description || ""}
+        onChange={handleChange}
+        placeholder="Description"
+      ></textarea>
+      <input
+        type="file"
+        name="photo"
+        onChange={handleChange}
+        className="w-full"
+      />
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
+        {isEditing ? "Update Home" : "Add Home"}
+      </button>
+    </form>
   );
 };
 
