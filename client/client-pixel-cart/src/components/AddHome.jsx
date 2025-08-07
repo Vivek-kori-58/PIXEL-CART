@@ -1,12 +1,13 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
+import Loading from "./Loading"; // Assuming you have a Loading component
 
 const AddHome = () => {
   const [searchParams] = useSearchParams();
   const isEditing = searchParams.get("editing") === "true";
   const homeId = searchParams.get("id");
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     houseName: "",
@@ -16,6 +17,46 @@ const AddHome = () => {
     description: "",
     photo: null,
   });
+
+  const handleAddHome = async (e) => {
+    e.preventDefault();
+    const formDataToSend = new FormData();
+    formDataToSend.append("houseName", formData.houseName);
+    formDataToSend.append("price", formData.price);
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("rating", formData.rating);
+    formDataToSend.append("description", formData.description);
+    if (formData.photo) {
+      formDataToSend.append("photo", formData.photo);
+    }
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "http://localhost:3001/host/add-home",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+      alert("Home added successfully!");
+      setLoading(false);
+      setFormData({
+        houseName: "",
+        price: "",
+        location: "",
+        rating: "",
+        description: "",
+        photo: null,
+      });
+    } catch (err) {
+      console.error("Add Error:", err);
+      alert("Something went wrong");
+      return;
+    }
+  };
 
   useEffect(() => {
     if (isEditing && homeId) {
@@ -95,6 +136,10 @@ const AddHome = () => {
     }
   };
 
+  if (loading) {
+    return <Loading />; // Show loading spinner while processing
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -146,12 +191,28 @@ const AddHome = () => {
         onChange={handleChange}
         className="w-full"
       />
-      <button
+      {isEditing ? (
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          {isEditing ? "Update Home" : "Add Home"}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={handleAddHome}
+        >
+          Add Home
+        </button>
+      )}
+      {/* <button
         type="submit"
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
         {isEditing ? "Update Home" : "Add Home"}
-      </button>
+      </button> */}
     </form>
   );
 };
