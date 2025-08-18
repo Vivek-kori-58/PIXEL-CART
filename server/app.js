@@ -14,6 +14,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const cors = require("cors");
 const user = require("./models/user");
+require("dotenv").config();
 
 // mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/?retryWrites=true&w=majority&appName=vivekDb
 
@@ -28,11 +29,9 @@ app.use(
   })
 );
 
-app.set("view engine", "ejs");
-app.set("views", "views");
-
+// mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/airbnb?retryWrites=true&w=majority&appName=vivekDb
 const store = MongoDBStore({
-  uri: "mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/airbnb?retryWrites=true&w=majority&appName=vivekDb",
+  uri:process.env.MONGO_URL ,
   collection: "sessions",
 });
 
@@ -57,7 +56,6 @@ const multerOptions = {
   storage: storage,
 };
 
-// app.use(express.urlencoded());
 app.use(multer(multerOptions).single("photo"));
 app.use(express.static(path.join(rootDir, "public")));
 app.use("/uploads", express.static(path.join(rootDir, "uploads")));
@@ -92,12 +90,11 @@ app.use(authRouter);
 
 app.use(errorsController.pageNotFound);
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
+// "mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/airbnb?retryWrites=true&w=majority&appName=vivekDb"
 mongoose
-  .connect(
-    "mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/airbnb?retryWrites=true&w=majority&appName=vivekDb"
-  )
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("database connected");
     app.listen(PORT, () => {

@@ -2,17 +2,6 @@ const { check, validationResult } = require("express-validator");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
-exports.getLogin = (req, res, next) => {
-  res.render("auth/login", {
-    pageTitle: "login",
-    currentPage: "login",
-    isLoggedIn: false,
-    errors: [],
-    oldInput: { email: "" },
-    user: {},
-  });
-};
-
 exports.postLogin = async (req, res, next) => {
   try {
     console.log(req.body);
@@ -36,14 +25,6 @@ exports.postLogin = async (req, res, next) => {
           userType: user.userType, // 👈✅ This is how you know the type
         },
       });
-      // .render("auth/login", {
-      //   pageTitle: "Login",
-      //   currentPage: "Login",
-      //   isLoggedIn: false,
-      //   errors: ["user not found"],
-      //   oldInput: { email },
-      //   user: {},
-      // });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -52,26 +33,11 @@ exports.postLogin = async (req, res, next) => {
       return res
         .status(422)
         .json({ success: false, message: "incorrect password" });
-      // .render("auth/login", {
-      //   pageTitle: "Login",
-      //   currentPage: "Login",
-      //   isLoggedIn: false,
-      //   errors: ["incorrect password"],
-      //   oldInput: { email },
-      //   user: {},
-      // });
     }
     req.session.isLoggedIn = true;
     req.session.user = user;
 
-    // req.session.user = {
-    //   _id: user._id,
-    //   name: user.name,
-    //   userType: user.userType, // <- this is important
-    // };
-
     await req.session.save();
-    // res.redirect("/");
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -110,27 +76,10 @@ exports.postLogout = (req, res, next) => {
       console.error("Logout error:", err);
       return res.status(500).json({ success: false, message: "Server error" });
     }
-    // res.redirect("/login");
     return res.status(200).json({ success: true, message: "Logged out" });
   });
 };
 
-exports.getSignup = (req, res, next) => {
-  res.render("auth/Signup", {
-    pageTitle: "Sign-up",
-    currentPage: "Sign-up",
-    isLoggedIn: false,
-    errors: [],
-    oldInput: {
-      FirstName: "",
-      LastName: "",
-      email: "",
-      password: "",
-      userType: "",
-    },
-    user: {},
-  });
-};
 
 exports.postSignup = [
   check("FirstName")
@@ -175,7 +124,7 @@ exports.postSignup = [
     .isIn(["guest", "host"])
     .withMessage("invalid usertype"),
 
-  (req, res, next) => {
+  (req, res) => {
     const { FirstName, LastName, email, password, userType } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -184,14 +133,6 @@ exports.postSignup = [
         message: "Validation failed",
         errors: errors.array().map((err) => err.msg),
       });
-      // .render("auth/Signup", {
-      //   pageTitle: "Sign-up",
-      //   currentPage: "Sign-up",
-      //   isLoggedIn: false,
-      //   errors: errors.array().map((err) => err.msg),
-      //   oldInput: { FirstName, LastName, email, password, userType },
-      //   user: {},
-      // });
     }
 
     bcrypt
@@ -220,14 +161,6 @@ exports.postSignup = [
           message: "error occured while signup new account",
           errors: err.message,
         });
-        // .render("auth/signup", {
-        //   pageTitle: "Sign-up",
-        //   currentPage: "Sign-up",
-        //   isLoggedIn: false,
-        //   errors: [err.message],
-        //   oldInput: { FirstName, LastName, email, userType },
-        //   user: {},
-        // });
       });
   },
 ];

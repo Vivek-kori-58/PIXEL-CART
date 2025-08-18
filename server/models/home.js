@@ -20,10 +20,4 @@ const homeSchema = mongoose.Schema({
   description: String,
 });
 
-// homeSchema.pre('findOneAndDelete',async function (next){
-//   const homeId = this.getQuery()['_id'];
-//   await favourite.deleteMany({houseId:homeId})
-//   next()
-// })
-
 module.exports = mongoose.model("Home", homeSchema);
