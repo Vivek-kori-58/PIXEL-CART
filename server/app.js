@@ -17,8 +17,9 @@ const user = require("./models/user");
 require("dotenv").config();
 
 // mongodb+srv://vivekDb:vivekDb@vivekdb.7wrhhfz.mongodb.net/?retryWrites=true&w=majority&appName=vivekDb
-
 const app = express();
+app.set("views","views");
+
 app.use(express.json()); // For JSON POST/PUT bodies
 app.use(express.urlencoded({ extended: true })); // For form data
 

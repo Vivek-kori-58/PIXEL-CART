@@ -1,3 +1,4 @@
+const home = require("../models/home");
 const Home = require("../models/home");
 const User = require("../models/user");
 
@@ -34,27 +35,58 @@ exports.getHomes = (req, res, next) => {
   });
 };
 
-exports.getBookings = (req, res, next) => {
-  res.render("store/bookings", {
-    pageTitle: "My Bookings",
-    currentPage: "bookings",
-    isLoggedIn: req.isLoggedIn,
-    user: req.session.user,
-  });
+exports.getBookings = async (req, res) => {
+  try {
+    const userId =
+      req.session?.user?._id || req.query.userId || req.body.userId;
+    const user = await User.findOne(userId).populate("bookings");
+    return res.json({
+      booking: user.bookings,
+    });
+  } catch (error) {
+    console.log("Error while geting booking:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get Booking" });
+  }
+  // res.status(200).json({ success: true, message: "booking page" });
+};
+
+exports.postBooking = async (req, res) => {
+  try {
+    const homeId = req.params.homeId;
+    const userId =
+      req.session?.user?._id || req.query.userId || req.body.userId;
+    console.log("Incoming userId:", userId);
+    console.log("Incoming homeId:", homeId);
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (!user.bookings.includes(homeId)) {
+      user.bookings.push(homeId);
+      await user.save();
+      return res
+        .status(200)
+        .json({ success: true, message: "Booking added successfully" });
+    }
+
+    return res.status(400).json({ success: false, message: "Already booked" });
+  } catch (error) {
+    console.log("Error while adding booking:", error);
+    res.status(500).json({ success: false, message: "Failed to add Booking" });
+  }
 };
 
 exports.getFavouriteList = async (req, res, next) => {
   // const userId =  req.session.user._id;
   const userId = req.session?.user?._id || req.query.userId || req.body.userId;
   const user = await User.findOne(userId).populate("favourites");
-
-  // res.render("store/favourite-list", {
-  //   favouriteHomes: user.favourites,
-  //   pageTitle: "My Favourites",
-  //   currentPage: "favourites",
-  //   isLoggedIn: req.isLoggedIn,
-  //   user: req.session.user,
-  // });
   return res.json({
     favouriteHomes: user.favourites,
   });
