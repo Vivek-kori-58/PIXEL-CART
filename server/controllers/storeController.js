@@ -41,7 +41,7 @@ exports.getBookings = async (req, res) => {
 
 exports.postBooking = async (req, res) => {
   try {
-    const homeId = req.params.homeId;
+    const homeId = req.body.homeId;
     const userId =
       req.session?.user?._id || req.query.userId || req.body.userId;
     console.log("Incoming userId:", userId);
