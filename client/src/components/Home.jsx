@@ -2,10 +2,12 @@ import React from "react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Loading from "./Loading";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [homeList, setHomeList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHomes = async () => {
@@ -28,6 +30,7 @@ const Home = () => {
     console.log("homeId", homeId);
 
     try {
+      
       const res = await axios.post(
         `http://localhost:3001/booking`,
         { homeId },
