@@ -7,13 +7,7 @@ exports.getIndex = (req, res, next) => {
 
   Home.find().then((registeredHomes) =>
     res
-      // .render("store/index", {
-      //   registeredHomes: registeredHomes,
-      //   pageTitle: "airbnb Home",
-      //   currentPage: "index",
-      //   isLoggedIn: req.isLoggedIn,
-      //   user: req.session.user,
-      // })
+      .status(200)
       .json({
         registeredHomes: registeredHomes,
       })
@@ -22,13 +16,6 @@ exports.getIndex = (req, res, next) => {
 
 exports.getHomes = (req, res, next) => {
   Home.find().then((registeredHomes) => {
-    // .render("store/home-list", {
-    //     registeredHomes: registeredHomes,
-    //     pageTitle: "Homes List",
-    //     currentPage: "Home",
-    //     isLoggedIn: req.isLoggedIn,
-    //     user: req.session.user,
-    //   })
     return res.json({
       registeredHomes: registeredHomes,
     });
@@ -111,7 +98,6 @@ exports.postAddToFavourite = async (req, res, next) => {
       console.log("favourite added", user.favourites);
     }
     res
-      // .redirect("/favourites");
       .status(200)
       .json({ success: true, message: "Favourite added" });
   } catch (error) {
@@ -153,13 +139,6 @@ exports.getHomeDetails = (req, res, next) => {
       });
     } else {
       console.log("home Found  by Id details", home);
-      // res.render("store/home-detail", {
-      //   home: home,
-      //   pageTitle: "Home Detail",
-      //   currentPage: "Home",
-      //   isLoggedIn: req.isLoggedIn,
-      //   user: req.session.user,
-      // });
       return res.json({
         home: home,
       });
